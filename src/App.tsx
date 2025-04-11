@@ -1,39 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import './App.css'
+
+type Section = { id: string; text: string };
 
 function App() {
-  const [sections, setSections] = useState<string[]>([]);
+  // null = loading, [] = loaded but empty, [..] = loaded with data
+  const [sections, setSections] = useState<Section[] | null>(null);
 
   const fetchSections = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { action: "getSections" },
-          (response: { sections: string[] }) => {
-            setSections(response.sections || []);
-          }
-        );
+      const tabId = tabs[0]?.id;
+      if (!tabId) {
+        setSections([]); // no tab → treat as empty
+        return;
       }
+
+      chrome.tabs.sendMessage(
+        tabId,
+        { action: "getSections" },
+        (response: { sections?: Section[] }) => {
+          setSections(response.sections || []);
+        }
+      );
     });
   };
 
-  return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-2">Sections Found</h1>
-      <button
-        onClick={fetchSections}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-      >
-        Fetch Sections
-      </button>
+  // Run once when popup opens
+  useEffect(() => {
+    fetchSections();
+  }, []);
 
-      <ul>
-        {sections.map((section, index) => (
-          <li key={index} className="mb-2 p-2 bg-gray-100 rounded">
-            {section}
-          </li>
-        ))}
-      </ul>
+  return (
+    <div className="container">
+      <h1 className="title">Sections Found</h1>
+
+      {sections === null ? (
+        <p className="loading">Loading…</p>
+      ) : sections.length === 0 ? (
+        <p className="empty-message">No prompt found</p>
+      ) : (
+        <ul className="section-list">
+          {sections.map(({ id, text }) => (
+            <li
+              key={id}
+              onClick={() => {
+                chrome.tabs.query(
+                  { active: true, currentWindow: true },
+                  (tabs) => {
+                    const tabId = tabs[0]?.id;
+                    if (tabId) {
+                      chrome.tabs.sendMessage(tabId, {
+                        action: "scrollToSection",
+                        id,
+                      });
+                    }
+                  }
+                );
+              }}
+              className="section-item"
+            >
+              {text}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
