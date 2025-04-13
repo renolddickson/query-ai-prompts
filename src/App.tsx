@@ -1,38 +1,70 @@
+// App.tsx
 import { useState, useEffect } from "react";
-import './App.css'
+import "./App.css";
 
 type Section = { id: string; text: string };
 
+// ——— Message & response types ———
+type GetSectionsMessage = { action: "getSections" };
+type ScrollMessage     = { action: "scrollToSection"; id: string };
+type ContentResponse   = { sections?: Section[] };
+
 function App() {
-  // null = loading, [] = loaded but empty, [..] = loaded with data
   const [sections, setSections] = useState<Section[] | null>(null);
 
-  const fetchSections = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabId = tabs[0]?.id;
-      if (!tabId) {
-        setSections([]); // no tab → treat as empty
-        return;
-      }
+  // Fetch all user‑prompt sections from the active tab
+  const fetchSections = async () => {
+    try {
+      // 1. Find the active tab
+      const tabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      const tab = tabs[0];
+      if (!tab?.id) throw new Error("No active tab");
 
-      chrome.tabs.sendMessage(
-        tabId,
-        { action: "getSections" },
-        (response: { sections?: Section[] }) => {
-          setSections(response.sections || []);
-        }
+      // 2. Send getSections message and assert response type
+      const raw = await chrome.tabs.sendMessage(
+        tab.id,
+        { action: "getSections" } as GetSectionsMessage
       );
-    });
+      const response = raw as ContentResponse;
+
+      // 3. Update state (default to empty array)
+      setSections(response.sections ?? []);
+    } catch (err) {
+      console.warn("fetchSections error:", err);
+      setSections([]); // on any error, show “No prompt found”
+    }
   };
 
-  // Run once when popup opens
+  // Scroll to a specific section
+  const scrollToSection = async (id: string) => {
+    try {
+      const tabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      const tab = tabs[0];
+      if (!tab?.id) throw new Error("No active tab");
+
+      await chrome.tabs.sendMessage(
+        tab.id,
+        { action: "scrollToSection", id } as ScrollMessage
+      );
+    } catch (err) {
+      console.warn("scrollToSection error:", err);
+    }
+  };
+
+  // Run once on mount
   useEffect(() => {
     fetchSections();
   }, []);
 
   return (
     <div className="container">
-      <h1 className="title">Sections Found</h1>
+      <h1 className="title">Prompts Found</h1>
 
       {sections === null ? (
         <p className="loading">Loading…</p>
@@ -43,21 +75,8 @@ function App() {
           {sections.map(({ id, text }) => (
             <li
               key={id}
-              onClick={() => {
-                chrome.tabs.query(
-                  { active: true, currentWindow: true },
-                  (tabs) => {
-                    const tabId = tabs[0]?.id;
-                    if (tabId) {
-                      chrome.tabs.sendMessage(tabId, {
-                        action: "scrollToSection",
-                        id,
-                      });
-                    }
-                  }
-                );
-              }}
               className="section-item"
+              onClick={() => scrollToSection(id)}
             >
               {text}
             </li>

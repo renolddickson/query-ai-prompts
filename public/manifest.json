@@ -1,31 +1,44 @@
 {
-    "manifest_version": 3,
-    "name": "Query #user-prompt",
-    "version": "1.0",
-    "description": "Queries and displays all user prompt from ai chat site like chaptgpt,claude, grok, gemini, deepseek, gwen",
-    "permissions": ["scripting", "activeTab"],
-    "action": {
-      "default_popup": "index.html",
-      "default_icon": {
-        "16": "icon16.png",
-        "48": "icon48.png",
-        "128": "icon128.png"
-      }
-    },
-    "background": {
-      "service_worker": "background.js"
-    },
-    "content_scripts": [
-      {
-        "matches": [
-          "https://chatgpt.com/*",
-          "https://gemini.google.com/*",
-          "https://grok.com/*",
-          "https://chat.qwen.ai/*",
-          "https://chat.deepseek.com/*",
-          "https://claude.ai/*"
-        ],
-        "js": ["content.js"]
-      }
-    ]
-  }
+  "manifest_version": 3,
+  "name": "Query #user-prompt",
+  "version": "1.0",
+  "description": "Queries and displays all user prompts from AI chat sites like ChatGPT, Claude, Grok, Gemini, DeepSeek, Qwen",
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://gemini.google.com/*",
+    "https://grok.com/*",
+    "https://chat.qwen.ai/*",
+    "https://chat.deepseek.com/*",
+    "https://claude.ai/*"
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://grok.com/*",
+        "https://chat.qwen.ai/*",
+        "https://chat.deepseek.com/*",
+        "https://claude.ai/*"
+      ],
+      "run_at": "document_idle",
+      "js": ["content.js"]
+    }
+  ]
+}

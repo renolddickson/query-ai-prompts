@@ -3,12 +3,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === "getSections") {
     // 1. Define host→selector map
     const siteSelectors: { host: string; selector: string }[] = [
-      { host: "chatgpt.com",         selector: '[data-message-author-role="user"]' },
-      { host: "gemini.google.com",    selector: ".gemini-user-message" },
-      { host: "grok.com",             selector: ".grok-user-message" },
+      { host: "chatgpt.com",         selector: "[data-message-author-role='user']" },
+      { host: "gemini.google.com",    selector: ".user-query-bubble-container" },
+      { host: "grok.com",             selector: ".message-bubble .whitespace-pre-wrap" },
       { host: "chat.qwen.ai",         selector: ".message-content-bg" },
-      { host: "chat.deepseek.com",    selector: ".deepseek-user" },
-      { host: "claude.ai",            selector: ".claude-user-message" },
+      { host: "chat.deepseek.com",    selector: ".fbb737a4" },
+      { host: "claude.ai",            selector: "[data-testid='user-message']" },
     ];
 
     // 2. Pick the selector for the current host (fallback to first entry)

@@ -29,15 +29,18 @@ body {
   font-weight: bold;
   margin-bottom: 12px;
   color: var(--text-primary);
+  text-align: center;
 }
 
 .loading {
   color: var(--text-secondary);
   font-style: italic;
+  text-align: center;
 }
 
 .empty-message {
   color: var(--text-secondary);
+  text-align: center;
 }
 
 .section-list {
