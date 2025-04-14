@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Query #user-prompt",
+  "name": "Query prompt",
   "version": "1.0",
   "description": "Queries and displays all user prompts from AI chat sites like ChatGPT, Claude, Grok, Gemini, DeepSeek, Qwen",
   "permissions": [
