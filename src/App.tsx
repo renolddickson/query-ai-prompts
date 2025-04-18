@@ -64,8 +64,9 @@ function App() {
 
   return (
     <div className="container">
+      {sections && sections.length > 0 &&
       <h1 className="title">Prompts Found</h1>
-
+      }
       {sections === null ? (
         <p className="loading">Loading…</p>
       ) : sections.length === 0 ? (
